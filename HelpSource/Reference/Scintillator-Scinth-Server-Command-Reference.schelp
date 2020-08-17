@@ -10,7 +10,7 @@ In general Scintillator attempts to follow the command syntax and semantics of t
 
 Some commands are marked as strong::asynchronous::, which in this context means they will send a response message back to the sender, sometimes strong::/scin_done::, upon completion of the command. For any command marked as asynchronous Scintillator is designed to always return a message, even if the execution of the command failed or the message body didn't parse.
 
-section::Master Controls
+section::Primary Controls
 
 subsection::/scin_quit
 
@@ -241,7 +241,7 @@ table::
 ::
 ::
 
-Create a new Scinth instance from the given ScinthDef, give it an ID, and add it to the tree of nodes. There are four ways to add the node to the tree as determined by the add action argument, with the same values as the SuperCollider audio synth server, defined as follows:
+Create a new Scinth instance from the given ScinthDef, give it an ID, and add it to the tree of nodes. If the ID was previously allocated to a group or scinth that node will be deleted. There are four ways to add the node to the tree as determined by the add action argument, with the same values as the SuperCollider audio synth server, defined as follows:
 
 definitionlist::
 ## add actions: || table::
@@ -269,7 +269,7 @@ table::
     ::
 ::
 
-Create a new group and add it to the tree of nodes.
+Create a new group and add it to the tree of nodes. If the groupID already describes an existing node that node will be freed.
 There are four ways to add the group to the tree as determined by the add action argument which is defined as follows (the same as for strong::/s_new::):
 definitionlist::
 ## add actions: || table::
@@ -360,6 +360,37 @@ table::
 
 N.B. The order of nodes corresponds to their execution order on the server. Thus child nodes (those contained within a group) are listed immediately following their parent.
 
+section::Camera Commands
+
+subsection::/scin_c_new
+
+Creates a new camera with the provided identifier and configuration.
+
+table::
+## strong::int:: || camera id
+## strong::int:: || frame rate
+::
+
+definitionlist::
+## frame rate: || table::
+    ## -1 || update the camera at the same rate as the primary camera
+    ## 0 || update the camera only when code::/scin_c_advanceFrame:: is called
+    ## >0 || update the camera at this many frames per second
+    ::
+::
+
+Cameras only update when the primary camera updates. As a result, no camera will update with a framerate faster than the primary frame rate. So, for example, if the server has been configured to run the primary camera at 30 frames per second, any camera created with a frame rate greater than 30 will stll update at 30. If the server is configured to run at 0 framerate then all cameras will either update at -1, meaning they will update automatically every time the main camera updates, or at 0, only updating when code::/scin_c_advanceFrame:: is called with the matching cameraID.
+
+subsection::/scin_c_advanceFrame
+
+Mark the camera for render update the next time the primary camera is updated, and then advance the camera time by the provided fraction, in seconds.
+
+table::
+## strong::int:: || camera id
+## strong::int:: || numerator for fractional time advancement
+## strong::int:: || denominator for fractional time advancement
+::
+
 section::ImageBuffer Commands
 
 The server leaves designation of unique image buffer numbers to the client. Allocation of an image buffer with a number already associated with another image buffer will result in the prior image buffer being deallocated.
@@ -410,6 +441,8 @@ table::
 ::
 
 section::Non Real Time Commands
+
+Note that non-real time commands are only supported when the Scintillator server has been configured with a 0 or positive frame rate value at boot time.
 
 subsection::/scin_nrt_screenShot
 
