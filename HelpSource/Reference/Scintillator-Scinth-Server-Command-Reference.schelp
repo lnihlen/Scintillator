@@ -368,7 +368,10 @@ Creates a new camera with the provided identifier and configuration.
 
 table::
 ## strong::int:: || camera id
+## strong::int:: || width in pixels
+## strong::int:: || height in pixels
 ## strong::int:: || frame rate
+## strong::int:: || minimum number of images in image stream
 ::
 
 definitionlist::
