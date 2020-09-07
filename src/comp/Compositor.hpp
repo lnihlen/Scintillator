@@ -17,6 +17,8 @@ public:
     Compositor(std::shared_ptr<vk::Device> device);
     ~Compositor();
 
+    bool create();
+
 private:
 
 };
